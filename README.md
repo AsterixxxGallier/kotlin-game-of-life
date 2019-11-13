@@ -1,2 +1,2 @@
 # kotlin-game-of-life
-Conway's Game of Life, implemented in Kotlin/JVM
+Conway's Game of Life, implemented in Kotlin/JVM, developed with IntelliJ.
