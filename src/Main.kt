@@ -147,10 +147,19 @@ class GameState(
 }
 
 class Game(var state: GameState) {
+	companion object {
+		private val survival = listOf(2, 3)
+		private val birth = listOf(3)
+	}
+
 	val boolGrid: BoolGrid
-		get() { return state.boolGrid }
+		get() {
+			return state.boolGrid
+		}
 	val neighbourGrid: IntGrid
-		get() { return state.neighbourGrid }
+		get() {
+			return state.neighbourGrid
+		}
 
 	fun step() {
 		val boolGrid = state.boolGrid
@@ -166,17 +175,19 @@ class Game(var state: GameState) {
 			for (columnIndex in 1 until columnCount - 2) {
 				val neighbourCount = neighbourRow[columnIndex]
 				if (boolRow[columnIndex]) {
-					boolRow[columnIndex] = neighbourCount == 3 || neighbourCount == 2
+					boolRow[columnIndex] = survival.contains(neighbourCount)
 				} else {
-					boolRow[columnIndex] = neighbourCount == 3
+					boolRow[columnIndex] = birth.contains(neighbourCount)
 				}
 			}
 		}
 	}
 }
 
+const val ROW_COUNT = 10
+const val COLUMN_COUNT = 10
 fun main() {
-	val boolGrid = BoolGrid(10, 10) { _, _ -> Random.nextBoolean() }
+	val boolGrid = BoolGrid(ROW_COUNT, COLUMN_COUNT) { _, _ -> Random.nextBoolean() }
 	println(boolGrid)
 	println()
 
