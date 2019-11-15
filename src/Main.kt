@@ -156,12 +156,14 @@ class Game(var state: GameState) {
 		get() {
 			return state.boolGrid
 		}
+
 	val neighbourGrid: IntGrid
 		get() {
 			return state.neighbourGrid
 		}
 
 	fun step() {
+		println("step called")
 		val boolGrid = state.boolGrid
 		val neighbourGrid = state.neighbourGrid
 		val boolRows = boolGrid.rows
@@ -173,6 +175,20 @@ class Game(var state: GameState) {
 			val boolRow = boolRows[rowIndex]
 			val neighbourRow = neighbourRows[rowIndex]
 			for (columnIndex in 1 until columnCount - 2) {
+				println()
+				println(boolRows.withIndex().joinToString("\n") { rowWithIndex ->
+					if (rowWithIndex.index == rowIndex) {
+						rowWithIndex.value.withIndex().joinToString(" ") {
+							if (it.index == columnIndex) {
+								if (it.value) "\u001B[32m1\u001B[0m" else "\u001B[32m0\u001B[0m"
+							} else {
+								if (it.value) "1" else "0"
+							}
+						}
+					} else {
+						rowWithIndex.value.joinToString(" ") { if (it) "1" else "0" }
+					}
+				})
 				val neighbourCount = neighbourRow[columnIndex]
 				if (boolRow[columnIndex]) {
 					boolRow[columnIndex] = survival.contains(neighbourCount)
@@ -192,14 +208,14 @@ fun main() {
 	println()
 
 	val state = GameState(boolGrid)
-	println("BOOLGRID")
-	println(boolGrid.relevantPart)
-	println("NEIGHBOURGRID")
-	println(state.neighbourGrid.relevantPart)
-
 	val game = Game(state)
-	println("BOOLGRID")
-	println(game.state.boolGrid.relevantPart)
-	println("NEIGHBOURGRID")
-	println(state.neighbourGrid.relevantPart)
+	repeat(100) {
+		println("STEP")
+// 	println("BOOLGRID")
+		println(game.boolGrid.relevantPart)
+// 	println("NEIGHBOURGRID")
+// 	println(game.neighbourGrid.relevantPart)
+
+		game.step()
+	}
 }
