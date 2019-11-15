@@ -1,12 +1,18 @@
+
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
+
+fun String.highlight(vararg codes: Int): String =
+	"\u001B[${codes.joinToString(";")}m$this\u001B[0m"
 
 interface Grid {
 	val rowCount: Int
 	val columnCount: Int
 
 	val relevantPart: Grid
+
+	fun toHighlightedString(rowIndex: Int, columnIndex: Int): String
 }
 
 class BoolGrid(
@@ -19,6 +25,19 @@ class BoolGrid(
 			init(rowIndex, columnIndex)
 		}
 	}
+
+	override fun toHighlightedString(rowIndex: Int, columnIndex: Int): String =
+		rows.withIndex().joinToString("\n") { rowWithIndex ->
+			if (rowWithIndex.index == rowIndex) {
+				rowWithIndex.value.withIndex().joinToString(" ") {
+					val stringified = if (it.value) "1" else "0"
+					if (it.index == columnIndex) stringified.highlight(32)
+					else stringified
+				}
+			} else {
+				rowWithIndex.value.joinToString(" ") { if (it) "1" else "0" }
+			}
+		}
 
 	override val relevantPart: Grid
 		get() {
@@ -40,6 +59,19 @@ class IntGrid(
 			init(rowIndex, columnIndex)
 		}
 	}
+
+	override fun toHighlightedString(rowIndex: Int, columnIndex: Int): String =
+		rows.withIndex().joinToString("\n") { rowWithIndex ->
+			if (rowWithIndex.index == rowIndex) {
+				rowWithIndex.value.withIndex().joinToString(" ") {
+					val stringified = it.toString()
+					if (it.index == columnIndex) stringified.highlight(32)
+					else stringified
+				}
+			} else {
+				rowWithIndex.value.joinToString(" ") { it.toString() }
+			}
+		}
 
 	override val relevantPart: Grid
 		get() {
@@ -95,19 +127,7 @@ class GameState(
 			//endregion
 			for (columnCenter in 1..(boolGrid.columnCount - 2)) {
 				println()
-				println(boolRows.withIndex().joinToString("\n") { rowWithIndex ->
-					if (rowWithIndex.index == rowIndex) {
-						rowWithIndex.value.withIndex().joinToString(" ") {
-							if (it.index == columnCenter) {
-								if (it.value) "\u001B[32m1\u001B[0m" else "\u001B[32m0\u001B[0m"
-							} else {
-								if (it.value) "1" else "0"
-							}
-						}
-					} else {
-						rowWithIndex.value.joinToString(" ") { if (it) "1" else "0" }
-					}
-				})
+				println(boolGrid.relevantPart.toHighlightedString(rowIndex, columnCenter))
 				if (boolRow[columnCenter]) {
 					println("Incrementing neighbour counts for surrounding cells...")
 
@@ -163,7 +183,7 @@ class Game(var state: GameState) {
 		}
 
 	fun step() {
-		println("step called")
+// 		println("step called")
 		val boolGrid = state.boolGrid
 		val neighbourGrid = state.neighbourGrid
 		val boolRows = boolGrid.rows
@@ -176,19 +196,7 @@ class Game(var state: GameState) {
 			val neighbourRow = neighbourRows[rowIndex]
 			for (columnIndex in 1 until columnCount - 2) {
 				println()
-				println(boolRows.withIndex().joinToString("\n") { rowWithIndex ->
-					if (rowWithIndex.index == rowIndex) {
-						rowWithIndex.value.withIndex().joinToString(" ") {
-							if (it.index == columnIndex) {
-								if (it.value) "\u001B[32m1\u001B[0m" else "\u001B[32m0\u001B[0m"
-							} else {
-								if (it.value) "1" else "0"
-							}
-						}
-					} else {
-						rowWithIndex.value.joinToString(" ") { if (it) "1" else "0" }
-					}
-				})
+				println(boolGrid.relevantPart.toHighlightedString(rowIndex, columnIndex))
 				val neighbourCount = neighbourRow[columnIndex]
 				if (boolRow[columnIndex]) {
 					boolRow[columnIndex] = survival.contains(neighbourCount)
@@ -211,11 +219,13 @@ fun main() {
 	val game = Game(state)
 	repeat(100) {
 		println("STEP")
-// 	println("BOOLGRID")
+		// 	println("BOOLGRID")
 		println(game.boolGrid.relevantPart)
-// 	println("NEIGHBOURGRID")
-// 	println(game.neighbourGrid.relevantPart)
+		// 	println("NEIGHBOURGRID")
+		// 	println(game.neighbourGrid.relevantPart)
 
 		game.step()
 	}
+
+// 	println("${"TEST".highlight(32)}TEST")
 }
